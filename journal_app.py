@@ -51,6 +51,7 @@ class EncryptedJournal(QMainWindow):
         
         # Setup UI
         self.initUI()
+        self.apply_styles()  # Apply theme styles after UI setup
         self.setup_auto_save()
         
         # Load data after UI is set up - THIS IS THE KEY FIX
@@ -59,6 +60,11 @@ class EncryptedJournal(QMainWindow):
         
         # Update initial storage info
         self.update_storage_display()
+        
+        # Initialize theme button text
+        if hasattr(self, 'ui_components'):
+            current_theme = self.config.get("theme", "dark")
+            self.ui_components.update_theme_button_text(current_theme)
         
     def setup_shortcuts(self):
         """Setup keyboard shortcuts"""
@@ -306,7 +312,8 @@ class EncryptedJournal(QMainWindow):
             self.auto_save_thread.start()
     
     def apply_styles(self):
-        self.setStyleSheet(get_app_stylesheet())
+        current_theme = self.config.get("theme", "dark")
+        self.setStyleSheet(get_app_stylesheet(current_theme))
 
     def toggle_left_panel(self):
         if self.left_panel_visible:

@@ -48,6 +48,23 @@ class SettingsManager:
             with open(self.parent.key_path, "wb") as f:
                 f.write(self.parent.key)
         self.parent.fernet = Fernet(self.parent.key)
+    
+    def toggle_theme(self):
+        """Toggle between dark and light theme"""
+        current_theme = self.parent.config.get("theme", "dark")
+        new_theme = "light" if current_theme == "dark" else "dark"
+        self.parent.config["theme"] = new_theme
+        self.save_config()
+        
+        # Apply the new theme
+        from styles import get_app_stylesheet
+        self.parent.setStyleSheet(get_app_stylesheet(new_theme))
+        
+        # Update any theme-dependent UI elements if needed
+        if hasattr(self.parent, 'ui_components'):
+            self.parent.ui_components.update_theme_button_text(new_theme)
+        
+        return new_theme
 
     def increase_font_size(self):
         self.parent.config["font_size"] = min(24, self.parent.config["font_size"] + 1)

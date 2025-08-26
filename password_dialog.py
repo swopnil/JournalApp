@@ -15,8 +15,17 @@ class PasswordDialog(QDialog):
         
         self.setWindowTitle("SecureJournal - Authentication")
         self.setModal(True)
-        self.setFixedSize(450, 450)
-        self.setWindowFlags(Qt.Dialog | Qt.WindowTitleHint)
+        
+        # Adjust dialog size based on mode and error state
+        if self.mode == "verify":
+            if self.attempts > 1:
+                self.setFixedSize(480, 500)  # Larger for error messages and warning
+            else:
+                self.setFixedSize(480, 420)  # Smaller for single password field
+        else:
+            self.setFixedSize(480, 520)  # Larger for password creation
+            
+        self.setWindowFlags(Qt.Dialog | Qt.WindowTitleHint | Qt.MSWindowsFixedSizeDialogHint)
         
         self.setup_ui()
         self.apply_styles()
@@ -26,18 +35,28 @@ class PasswordDialog(QDialog):
         layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
         
-        # Header section with Evernote green
+        # Header section
         header = QFrame()
         header.setObjectName("header")
-        header.setFixedHeight(100)
-        header_layout = QVBoxLayout(header)
-        header_layout.setContentsMargins(30, 20, 30, 20)
+        
+        # Adjust header height based on error state
+        if self.mode == "verify" and self.attempts > 1:
+            header.setFixedHeight(140)  # More space for error message
+            header_layout = QVBoxLayout(header)
+            header_layout.setContentsMargins(40, 25, 40, 25)
+            header_layout.setSpacing(12)  # More spacing for error
+        else:
+            header.setFixedHeight(120)
+            header_layout = QVBoxLayout(header)
+            header_layout.setContentsMargins(40, 25, 40, 25)
+            header_layout.setSpacing(8)
+        
         header_layout.setAlignment(Qt.AlignCenter)
         
         # App icon and title
         app_title = QLabel("🐘 SecureJournal")
         app_title.setObjectName("appTitle")
-        app_title.setFont(QFont("Segoe UI", 24, QFont.Bold))
+        app_title.setFont(QFont("Segoe UI", 26, QFont.Bold))
         app_title.setAlignment(Qt.AlignCenter)
         
         # Subtitle based on mode
@@ -52,7 +71,7 @@ class PasswordDialog(QDialog):
                 subtitle = QLabel("Enter your master password")
                 subtitle.setObjectName("subtitle")
         
-        subtitle.setFont(QFont("Segoe UI", 12))
+        subtitle.setFont(QFont("Segoe UI", 13))
         subtitle.setAlignment(Qt.AlignCenter)
         
         header_layout.addWidget(app_title)
@@ -64,8 +83,21 @@ class PasswordDialog(QDialog):
         content = QFrame()
         content.setObjectName("content")
         content_layout = QVBoxLayout(content)
-        content_layout.setContentsMargins(40, 30, 40, 30)
-        content_layout.setSpacing(20)
+        
+        # Adjust spacing based on mode and error state
+        if self.mode == "verify":
+            if self.attempts > 1:
+                # More space needed for error state with warning
+                content_layout.setContentsMargins(50, 30, 50, 30)
+                content_layout.setSpacing(20)
+            else:
+                # Compact for normal verification
+                content_layout.setContentsMargins(50, 25, 50, 25)
+                content_layout.setSpacing(18)
+        else:
+            # Normal spacing for password creation
+            content_layout.setContentsMargins(50, 40, 50, 40)
+            content_layout.setSpacing(25)
         
         if self.mode == "create":
             # Password creation fields
@@ -81,7 +113,7 @@ class PasswordDialog(QDialog):
             self.password_input = QLineEdit()
             self.password_input.setObjectName("passwordInput")
             self.password_input.setEchoMode(QLineEdit.Password)
-            self.password_input.setMinimumHeight(40)
+            self.password_input.setMinimumHeight(45)
             self.password_input.setPlaceholderText("Enter a secure password...")
             self.password_input.setFont(QFont("Segoe UI", 12))
             
@@ -93,7 +125,7 @@ class PasswordDialog(QDialog):
             self.confirm_input = QLineEdit()
             self.confirm_input.setObjectName("passwordInput")
             self.confirm_input.setEchoMode(QLineEdit.Password)
-            self.confirm_input.setMinimumHeight(40)
+            self.confirm_input.setMinimumHeight(45)
             self.confirm_input.setPlaceholderText("Confirm your password...")
             self.confirm_input.setFont(QFont("Segoe UI", 12))
             
@@ -115,7 +147,7 @@ class PasswordDialog(QDialog):
             self.password_input = QLineEdit()
             self.password_input.setObjectName("passwordInput")
             self.password_input.setEchoMode(QLineEdit.Password)
-            self.password_input.setMinimumHeight(40)
+            self.password_input.setMinimumHeight(45)
             self.password_input.setPlaceholderText("Enter your password...")
             self.password_input.setFont(QFont("Segoe UI", 12))
             
@@ -145,14 +177,14 @@ class PasswordDialog(QDialog):
         # Button section
         button_section = QFrame()
         button_section.setObjectName("buttonSection")
-        button_section.setFixedHeight(70)
+        button_section.setFixedHeight(80)
         button_layout = QHBoxLayout(button_section)
-        button_layout.setContentsMargins(40, 15, 40, 15)
+        button_layout.setContentsMargins(50, 20, 50, 20)
         button_layout.setSpacing(15)
         
         self.cancel_btn = QPushButton("Cancel")
         self.cancel_btn.setObjectName("cancelButton")
-        self.cancel_btn.setMinimumSize(100, 40)
+        self.cancel_btn.setMinimumSize(110, 45)
         self.cancel_btn.setFont(QFont("Segoe UI", 11, QFont.Bold))
         self.cancel_btn.clicked.connect(self.reject)
         
@@ -162,7 +194,7 @@ class PasswordDialog(QDialog):
             self.ok_btn = QPushButton("Sign In")
         
         self.ok_btn.setObjectName("okButton")
-        self.ok_btn.setMinimumSize(140, 40)
+        self.ok_btn.setMinimumSize(150, 45)
         self.ok_btn.setFont(QFont("Segoe UI", 11, QFont.Bold))
         self.ok_btn.setDefault(True)
         self.ok_btn.clicked.connect(self.accept_password)
@@ -255,15 +287,17 @@ class PasswordDialog(QDialog):
         """
     
     def apply_styles(self):
-        """Apply dark mode theme"""
+        """Apply modern dark theme"""
         self.setStyleSheet("""
             QDialog {
-                background-color: #1a1a1a;
-                color: #e0e0e0;
+                background-color: #0f172a;
+                color: #e2e8f0;
+                border: 1px solid #334155;
             }
             
             QFrame#header {
-                background-color: #6366f1;
+                background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                           stop: 0 #3b82f6, stop: 1 #1d4ed8);
                 border: none;
                 border-radius: 0;
             }
@@ -271,124 +305,153 @@ class PasswordDialog(QDialog):
             QLabel#appTitle {
                 color: #ffffff;
                 background: transparent;
+                font-weight: 700;
             }
             
             QLabel#subtitle {
-                color: rgba(255, 255, 255, 0.9);
+                color: rgba(255, 255, 255, 0.95);
                 background: transparent;
+                font-weight: 500;
             }
             
             QLabel#subtitleError {
-                color: #fef2f2;
-                background: #ef4444;
+                color: #ffffff;
+                background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                          stop: 0 #ef4444, stop: 1 #dc2626);
                 font-weight: bold;
-                padding: 4px 8px;
-                border-radius: 4px;
+                padding: 10px 20px;
+                border-radius: 8px;
+                border: 1px solid #f87171;
+                margin: 5px 0px;
             }
             
             QFrame#content {
-                background-color: #1a1a1a;
+                background-color: #0f172a;
                 border: none;
             }
             
             QLabel#fieldLabel {
-                color: #e0e0e0;
+                color: #cbd5e1;
                 background: transparent;
+                font-weight: 600;
+                margin-bottom: 6px;
             }
             
             QLineEdit#passwordInput {
-                background-color: #2b2b2b;
-                color: #e0e0e0;
-                border: 2px solid #404040;
-                border-radius: 6px;
-                padding: 10px 15px;
-                font-size: 12px;
+                background-color: #1e293b;
+                color: #e2e8f0;
+                border: 2px solid #475569;
+                border-radius: 8px;
+                padding: 12px 16px;
+                font-size: 14px;
+                font-weight: 500;
             }
             
             QLineEdit#passwordInput:focus {
-                border-color: #6366f1;
-                background-color: #333333;
+                border-color: #3b82f6;
+                background-color: #334155;
                 outline: none;
             }
             
+            QLineEdit#passwordInput:hover {
+                border-color: #64748b;
+                background-color: #334155;
+            }
+            
             QLineEdit#passwordInput::placeholder {
-                color: #6b7280;
+                color: #94a3b8;
+                font-style: italic;
             }
             
             QCheckBox#showPassword {
-                color: #d1d5db;
-                font-size: 10px;
-                spacing: 8px;
+                color: #cbd5e1;
+                font-size: 11px;
+                font-weight: 500;
+                spacing: 10px;
             }
             
             QCheckBox#showPassword::indicator {
-                width: 16px;
-                height: 16px;
+                width: 18px;
+                height: 18px;
             }
             
             QCheckBox#showPassword::indicator:unchecked {
-                background-color: #2b2b2b;
-                border: 2px solid #555555;
-                border-radius: 3px;
+                background-color: #1e293b;
+                border: 2px solid #475569;
+                border-radius: 4px;
+            }
+            
+            QCheckBox#showPassword::indicator:unchecked:hover {
+                border-color: #64748b;
+                background-color: #334155;
             }
             
             QCheckBox#showPassword::indicator:checked {
-                background-color: #6366f1;
-                border: 2px solid #6366f1;
-                border-radius: 3px;
-                image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIHZpZXdCb3g9IjAgMCAxMCAxMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTguNSAzTDQgNy41TDEuNSA1IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K);
+                background-color: #3b82f6;
+                border: 2px solid #3b82f6;
+                border-radius: 4px;
+                image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iMTIiIHZpZXdCb3g9IjAgMCAxMiAxMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEwIDNMNCA5TDIgNyIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K);
             }
             
             QCheckBox#showPassword::indicator:checked:hover {
-                background-color: #5b21b6;
-                border-color: #5b21b6;
+                background-color: #1d4ed8;
+                border-color: #1d4ed8;
             }
             
             QLabel#warningLabel {
-                color: #fef2f2;
-                background-color: #7f1d1d;
-                border: 1px solid #dc2626;
-                border-radius: 6px;
-                padding: 10px;
-                margin: 10px 0;
+                color: #ffffff;
+                background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                          stop: 0 #dc2626, stop: 1 #991b1b);
+                border: 1px solid #f87171;
+                border-radius: 8px;
+                padding: 14px 18px;
+                margin: 15px 0;
+                font-weight: 600;
             }
             
             QFrame#buttonSection {
-                background-color: #2b2b2b;
-                border-top: 1px solid #404040;
+                background-color: #1e293b;
+                border-top: 1px solid #475569;
                 border-radius: 0;
             }
             
             QPushButton#okButton {
-                background-color: #6366f1;
+                background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                          stop: 0 #3b82f6, stop: 1 #1d4ed8);
                 color: #ffffff;
                 border: none;
-                border-radius: 6px;
-                font-weight: bold;
+                border-radius: 8px;
+                font-weight: 700;
+                font-size: 12px;
             }
             
             QPushButton#okButton:hover {
-                background-color: #5b21b6;
+                background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                          stop: 0 #1d4ed8, stop: 1 #1e40af);
             }
             
             QPushButton#okButton:pressed {
-                background-color: #4c1d95;
+                background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                          stop: 0 #1e40af, stop: 1 #1e3a8a);
             }
             
             QPushButton#cancelButton {
-                background-color: #3a3a3a;
-                color: #e0e0e0;
-                border: 1px solid #555555;
-                border-radius: 6px;
-                font-weight: bold;
+                background-color: #475569;
+                color: #e2e8f0;
+                border: 1px solid #64748b;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 12px;
             }
             
             QPushButton#cancelButton:hover {
-                background-color: #4a4a4a;
-                border-color: #6b7280;
+                background-color: #64748b;
+                border-color: #94a3b8;
+                color: #ffffff;
             }
             
             QPushButton#cancelButton:pressed {
-                background-color: #555555;
+                background-color: #334155;
+                border-color: #475569;
             }
         """)

@@ -84,6 +84,16 @@ class UIComponents:
     def __init__(self, parent):
         self.parent = parent
 
+    def update_theme_button_text(self, theme):
+        """Update theme toggle button icon based on current theme"""
+        if hasattr(self.parent, 'theme_toggle_btn'):
+            if theme == "dark":
+                self.parent.theme_toggle_btn.setText("🌙")
+                self.parent.theme_toggle_btn.setToolTip("Switch to Light Theme")
+            else:
+                self.parent.theme_toggle_btn.setText("☀️")
+                self.parent.theme_toggle_btn.setToolTip("Switch to Dark Theme")
+
     def create_left_panel(self):
         panel = QFrame()
         panel.setObjectName("leftPanel")
@@ -97,31 +107,53 @@ class UIComponents:
         
         # Header section
         header_section = QFrame()
-        header_section.setStyleSheet("background-color: #1a1a1a; border: none; border-radius: 0;")
+        header_section.setObjectName("headerSection")
         header_section.setFixedHeight(80)
         
         header_layout = QVBoxLayout(header_section)
-        header_layout.setContentsMargins(20, 15, 20, 15)
-        header_layout.setAlignment(Qt.AlignCenter)
+        header_layout.setContentsMargins(20, 10, 20, 10)
+        
+        # Top row with title and theme toggle
+        top_row = QHBoxLayout()
+        top_row.setAlignment(Qt.AlignTop)
+        
+        # Left side - title section
+        title_section = QVBoxLayout()
+        title_section.setAlignment(Qt.AlignCenter)
         
         # App title with Evernote-style elephant icon representation
         title = QLabel("🐘 SecureJournal")
-        title.setFont(QFont("Segoe UI", 20, QFont.Bold))
-        title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("color: #ffffff; background: transparent;")
+        title.setObjectName("appTitle")
+        title.setFont(QFont("Segoe UI", 18, QFont.Bold))
+        title.setAlignment(Qt.AlignLeft)
         
         subtitle = QLabel("Your thoughts, secured")
-        subtitle.setFont(QFont("Segoe UI", 10))
-        subtitle.setAlignment(Qt.AlignCenter)
-        subtitle.setStyleSheet("color: rgba(255, 255, 255, 0.8); background: transparent;")
+        subtitle.setObjectName("appSubtitle")
+        subtitle.setFont(QFont("Segoe UI", 9))
+        subtitle.setAlignment(Qt.AlignLeft)
         
-        header_layout.addWidget(title)
-        header_layout.addWidget(subtitle)
+        title_section.addWidget(title)
+        title_section.addWidget(subtitle)
+        
+        # Right side - theme toggle button
+        self.parent.theme_toggle_btn = QPushButton("🌙")
+        self.parent.theme_toggle_btn.setObjectName("toggleButton")
+        self.parent.theme_toggle_btn.setMaximumSize(32, 32)
+        self.parent.theme_toggle_btn.setMinimumSize(32, 32)
+        self.parent.theme_toggle_btn.setFont(QFont("Segoe UI", 14))
+        self.parent.theme_toggle_btn.setToolTip("Toggle Dark/Light Theme")
+        self.parent.theme_toggle_btn.clicked.connect(self.parent.settings_manager.toggle_theme)
+        
+        top_row.addLayout(title_section)
+        top_row.addStretch()
+        top_row.addWidget(self.parent.theme_toggle_btn)
+        
+        header_layout.addLayout(top_row)
         layout.addWidget(header_section)
         
-        # Main content area - Dark background with full width
+        # Main content area - with full width
         content_area = QFrame()
-        content_area.setStyleSheet("background-color: #252525; border: none;")
+        content_area.setObjectName("contentArea")
         content_layout = QVBoxLayout(content_area)
         content_layout.setContentsMargins(0, 0, 0, 15)  # No left/right margins for full width
         content_layout.setSpacing(0)  # No spacing between sections
@@ -133,21 +165,20 @@ class UIComponents:
         
         # Notebooks section - Full width
         notebooks_widget = QWidget()
-        notebooks_widget.setStyleSheet("background-color: #2b2b2b; border: none; border-radius: 0;")
+        notebooks_widget.setObjectName("notebooksWidget")
         notebooks_layout = QVBoxLayout(notebooks_widget)
         notebooks_layout.setContentsMargins(0, 0, 0, 0)  # No margins for full width
         notebooks_layout.setSpacing(0)
         
         # Notebooks header - with padding only inside
         notebooks_header = QFrame()
-        notebooks_header.setStyleSheet("background-color: #1e1e1e; border: none; border-bottom: 1px solid #404040;")
+        notebooks_header.setObjectName("notebooksHeader")
         notebooks_header_layout = QHBoxLayout(notebooks_header)
         notebooks_header_layout.setContentsMargins(15, 15, 15, 10)  # Padding only inside header
         
         notebooks_label = QLabel("NOTEBOOKS")
         notebooks_label.setObjectName("sectionHeader")
         notebooks_label.setFont(QFont("Segoe UI", 14, QFont.Bold))
-        notebooks_label.setStyleSheet("color: #c7d2fe; background: transparent;")
         
         self.parent.new_notebook_btn = QPushButton("+")
         self.parent.new_notebook_btn.setObjectName("roundButton")
@@ -171,21 +202,20 @@ class UIComponents:
         
         # Entries section - Full width
         entries_widget = QWidget()
-        entries_widget.setStyleSheet("background-color: #2b2b2b; border: none; border-radius: 0;")
+        entries_widget.setObjectName("entriesWidget")
         entries_layout = QVBoxLayout(entries_widget)
         entries_layout.setContentsMargins(0, 0, 0, 0)  # No margins for full width
         entries_layout.setSpacing(0)
         
         # Entries header - with padding only inside
         entries_header = QFrame()
-        entries_header.setStyleSheet("background-color: #1e1e1e; border: none; border-bottom: 1px solid #404040;")
+        entries_header.setObjectName("entriesHeader")
         entries_header_layout = QHBoxLayout(entries_header)
         entries_header_layout.setContentsMargins(15, 15, 15, 10)  # Padding only inside header
         
         entries_label = QLabel("NOTES")
         entries_label.setObjectName("sectionHeader")
         entries_label.setFont(QFont("Segoe UI", 14, QFont.Bold))
-        entries_label.setStyleSheet("color: #c7d2fe; background: transparent;")
         
         self.parent.new_entry_btn = QPushButton("+")
         self.parent.new_entry_btn.setObjectName("roundButton")
@@ -241,8 +271,8 @@ class UIComponents:
     
     def create_right_panel(self):
         panel = QFrame()
+        panel.setObjectName("rightPanel")
         panel.setFrameStyle(QFrame.StyledPanel)
-        panel.setStyleSheet("background-color: #1a1a1a; border: none;")
         
         layout = QVBoxLayout(panel)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -268,7 +298,7 @@ class UIComponents:
         
         # Toggle button
         self.parent.toggle_btn = QPushButton("‹")
-        self.parent.toggle_btn.setObjectName("toggleButton")
+        self.parent.toggle_btn.setObjectName("panelToggleButton")
         self.parent.toggle_btn.setMaximumSize(32, 32)
         self.parent.toggle_btn.setMinimumSize(32, 32)
         self.parent.toggle_btn.setFont(QFont("Segoe UI", 16, QFont.Bold))
@@ -333,9 +363,9 @@ class UIComponents:
         container_layout.addWidget(self.parent.editor, 1)
         layout.addWidget(writing_container, 1)
         
-        # Bottom status bar - Dark theme
+        # Bottom status bar
         status_section = QFrame()
-        status_section.setStyleSheet("background-color: #2b2b2b; border-top: 1px solid #404040; border-radius: 0;")
+        status_section.setObjectName("statusSection")
         status_layout = QHBoxLayout(status_section)
         status_layout.setContentsMargins(20, 8, 20, 8)
         status_layout.setSpacing(20)
